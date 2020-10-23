@@ -1,0 +1,124 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SpriteAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 7363023196ab8f541b231b866c0f5b1c, type: 3}
+    totalSpriteSurfaceArea: 1949824
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: eea0bd804d9854d46a8407552f3c389e, type: 3}
+  - {fileID: 21300000, guid: 8656f9f0cd8204883868bbfd4b4f3726, type: 3}
+  - {fileID: 21300000, guid: bc86f0615cc89422ab2f92f5d7ab13b6, type: 3}
+  - {fileID: 21300000, guid: ca03e7a16645f41c09c4ce2468fc6e75, type: 3}
+  - {fileID: 21300000, guid: 98b64c12d11704b7eb43be9f30cff6be, type: 3}
+  - {fileID: 21300000, guid: 0a86b7327aa814a1b910cdc4715372c1, type: 3}
+  - {fileID: 21300000, guid: 6462d772c4f374772bf05fc5e29eeff8, type: 3}
+  - {fileID: 21300000, guid: d8478082d117349c3bfe28ef3ed69d9c, type: 3}
+  - {fileID: 21300000, guid: 011be0929a6b24d1292f39e64b642ba7, type: 3}
+  - {fileID: 21300000, guid: bdef2d354d6a6499db5a3d73800efcb0, type: 3}
+  - {fileID: 21300000, guid: b7fd20551d34df04684ac005d1b54c14, type: 3}
+  - {fileID: 21300000, guid: 995ff8b50cd9a4c1ab7d22bfcc78b6d4, type: 3}
+  - {fileID: 21300000, guid: 2036cac5bb0f1471fad7bde1247372eb, type: 3}
+  - {fileID: 21300000, guid: 174432960db5c4bce8b85bb67aa1efec, type: 3}
+  - {fileID: 21300000, guid: 61e52a273d09947589240edf64963509, type: 3}
+  - {fileID: 21300000, guid: d081dbd74de754396869a78b0b348999, type: 3}
+  - {fileID: 21300000, guid: 2661c6089e4924517a3ffc3efb302b33, type: 3}
+  - {fileID: 21300000, guid: 902eb658c336f4ef785fc23e0f92eba3, type: 3}
+  - {fileID: 21300000, guid: 8690259851a6f49adab0f9e79c6a7e95, type: 3}
+  - {fileID: 21300000, guid: d379af98faedb4fbe96450ff0970155c, type: 3}
+  - {fileID: 21300000, guid: 12a510f885b534dc6b3c0a2abc0d3b7b, type: 3}
+  - {fileID: 21300000, guid: 44cefd29d6ed940f88ace0583ac5b58c, type: 3}
+  - {fileID: 21300000, guid: a5224d3924c674d549abcec1b4df8373, type: 3}
+  - {fileID: 21300000, guid: ebe40f590da324fd9817d311edfac844, type: 3}
+  - {fileID: 21300000, guid: b81354c9699f543c0a256483c8f6ca58, type: 3}
+  - {fileID: 21300000, guid: 4e1fd6d925f6649e58a038f5896d3de5, type: 3}
+  - {fileID: 21300000, guid: e487700a9ab324c49868a2d010fa22a1, type: 3}
+  - {fileID: 21300000, guid: 9dc89dfa8852549e4a3f7262db00a72e, type: 3}
+  - {fileID: 21300000, guid: 0a5dca2b046e74740964e876c9fe72a2, type: 3}
+  - {fileID: 21300000, guid: 3212428bff945a84cb1e2c2aaf887e2d, type: 3}
+  - {fileID: 21300000, guid: 42005afb256654d4db0ccb3704572942, type: 3}
+  - {fileID: 21300000, guid: 16b323ac4663246eb904fbc31920f609, type: 3}
+  - {fileID: 21300000, guid: f53ae7ac2ee61418994909a87a3f6dbb, type: 3}
+  - {fileID: 21300000, guid: 83319fbc48c104916824e692e4e776d5, type: 3}
+  - {fileID: 21300000, guid: 0a718f3db41f74391a0a6e898ade0cd1, type: 3}
+  - {fileID: 21300000, guid: ee3a5d9ea9c974744a81d7ae9bb5fca4, type: 3}
+  - {fileID: 21300000, guid: 9a39eccea65564eba81b56fc81a6648c, type: 3}
+  - {fileID: 21300000, guid: 710330ee0a5a44a1fbe220edfe472c64, type: 3}
+  - {fileID: 21300000, guid: a754333f8992a4e3bb5aa6ee678f685d, type: 3}
+  - {fileID: 21300000, guid: c23ef79f128e546dbad09222b6243613, type: 3}
+  - {fileID: 21300000, guid: 5fa7f9ff6749d4773b8342b90b646907, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - boy_2
+  - clear_boy
+  - boy_1
+  - number_7
+  - number_5
+  - cell_blank
+  - flag
+  - cell_dummy
+  - number_6
+  - logo_minesweeper
+  - number_1
+  - plane_6
+  - bomb
+  - cell_closed
+  - boy_4
+  - number_3
+  - clear_sky
+  - logo_gameover
+  - boy_7
+  - plane_7
+  - boy_3
+  - boy_5
+  - number_9
+  - plane_5
+  - plane_2
+  - plane_1
+  - plane_4
+  - over_bomb
+  - number_4
+  - number_0
+  - number_2
+  - logo_sublitle
+  - boy_6
+  - over_boy
+  - logo_clear
+  - plane_3
+  - airport
+  - plane_8
+  - number_8
+  - second
+  - button_retry
+  m_Tag: SpriteAtlas
+  m_IsVariant: 0
