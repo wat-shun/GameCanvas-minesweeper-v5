@@ -78,7 +78,7 @@ public sealed class GamePlayScene : GcScene
 {
     // ゲーム設定
     private float _startTime;
-    private static readonly Vector2Int BoardSize = new Vector2Int(10, 8);
+    private static readonly int2 BoardSize = new int2(10, 8);
     private const int BombCount = 15; // 爆弾の数
     private MinesweeperBoard _minesweeperBoard;
 
@@ -145,30 +145,28 @@ public sealed class GamePlayScene : GcScene
                 {
                     _isProcessedPointerEvent = false;
                 }
-                else if (!_isProcessedPointerEvent)
+                else if (!_isProcessedPointerEvent && !_minesweeperBoard.IsOpened(x, y))
                 {
                     if (_cellButton[x, y].IsHolding(0.5f)) // 旗の設置処理
                     {
                         _isProcessedPointerEvent = true;
 
                         gc.PlaySE(GcSound.Se_flagged);
-                        _minesweeperBoard.turnFlag(x, y);
+                        _minesweeperBoard.TurnFlag(x, y);
                     }
-                    else if (!_minesweeperBoard.isFlag(x, y)
-                             && !_minesweeperBoard.isOpen(x, y)
-                             && _cellButton[x, y].IsReleased()) // セルの開封処理
+                    else if (!_minesweeperBoard.IsFlag(x, y) && _cellButton[x, y].IsReleased()) // セルの開封処理
                     {
                         _isProcessedPointerEvent = true;
 
                         gc.PlaySE(GcSound.Se_open);
-                        _minesweeperBoard.open(x, y);
+                        _minesweeperBoard.Open(x, y);
 
                         // 終了判定
-                        if (_minesweeperBoard.isGameover())
+                        if (_minesweeperBoard.IsGameover())
                         {
                             gc.ChangeScene<GameOverScene>();
                         }
-                        else if (_minesweeperBoard.isClear())
+                        else if (_minesweeperBoard.IsClear())
                         {
                             gc.ChangeScene<GameClearScene>(new GameClearSceneState(_timerActor.Second));
                         }
@@ -208,24 +206,24 @@ public sealed class GamePlayScene : GcScene
                 var pos = _boardPadding + new float2(_cellImageSize.x * i, _cellImageSize.y * j);
 
                 // 爆弾か数字
-                if (_minesweeperBoard.isBomb(x, y))
+                if (_minesweeperBoard.IsBomb(x, y))
                 {
                     gc.DrawImage(GcImage.Bomb, pos);
                 }
-                else if (_minesweeperBoard.cntAroundBomb(x, y) > 0)
+                else if (_minesweeperBoard.CntAroundBomb(x, y) > 0)
                 {
-                    gc.DrawImage(NumberImage.Image[_minesweeperBoard.cntAroundBomb(x, y)], pos);
+                    gc.DrawImage(NumberImage.Image[_minesweeperBoard.CntAroundBomb(x, y)], pos);
                 }
 
                 // 未開封
-                if (!_minesweeperBoard.isOpen(x, y))
+                if (!_minesweeperBoard.IsOpened(x, y))
                 {
                     gc.DrawImage(GcImage.Cell_closed, pos);
                     // gc.DrawImage(GcImage.Cell_closed, pos.x, pos.y, 6, 6); // チートモード用
                 }
 
                 // 旗
-                if (_minesweeperBoard.isFlag(x, y))
+                if (_minesweeperBoard.IsFlag(x, y))
                 {
                     gc.DrawImage(GcImage.Flag, pos);
                 }
