@@ -2,9 +2,6 @@ using GameCanvas;
 using Unity.Mathematics;
 using UnityEngine;
 
-// TODO 描画順の管理がうまくいってないのを直したい
-// 理想:背景→飛行機→男の子→ロゴ・ボタン・スコア
-
 /// <summary>
 /// ゲームクリア画面を呼び出すときに渡す変数を管理する構造体です。
 /// </summary>
@@ -15,6 +12,19 @@ public readonly struct GameClearSceneState
     public GameClearSceneState(int clearTime)
     {
         ClearTime = clearTime;
+    }
+}
+
+public sealed class BackgroundActor : GcActor
+{
+    public BackgroundActor()
+    {
+        Priority = 0;
+    }
+
+    public override void Draw()
+    {
+        gc.DrawImageWithAnchor(GcImage.Clear_sky, GcAnchor.MiddleCenter);
     }
 }
 
@@ -29,7 +39,7 @@ public sealed class PlaneActor : GcActor
     public PlaneActor(GcImage image)
     {
         _image = image;
-        Priority = 0;
+        Priority = 1;
 
         InitStatus();
     }
@@ -61,42 +71,93 @@ public sealed class PlaneActor : GcActor
     }
 }
 
+public sealed class ClearBoyActor : GcActor
+{
+    public ClearBoyActor()
+    {
+        Priority = 2;
+    }
+
+    public override void Draw()
+    {
+        var deg = 360 * (gc.TimeSinceStartup % 1);
+        var cy = (int)(32 * gc.Sin(deg));
+        gc.DrawImageWithAnchor(GcImage.Clear_boy, GcAnchor.MiddleCenter, new float2(0, cy));
+    }
+}
+
+public sealed class ClearLogoActor : GcActor
+{
+    public ClearLogoActor()
+    {
+        Priority = 3;
+    }
+
+    public override void Draw()
+    {
+        gc.DrawImageWithAnchor(GcImage.Logo_clear, GcAnchor.UpperCenter, new float2(0, 32));
+    }
+}
+
+public sealed class ClearTimeActor : TimerActor
+{
+    public ClearTimeActor(in int clearTime) : base(clearTime, CalcRightUpperPos(clearTime))
+    {
+        Priority = 5;
+    }
+
+    private static int2 CalcRightUpperPos(in int clearTime)
+    {
+        var k = (clearTime == 1) ? 1 : ((int)Mathf.Log10(clearTime) + 2); // 秒を含む桁数
+        var size = gc.GetImageSize(GcImage.Number_0);
+        var x = gc.CanvasWidth / 2 + size.x * (k - 1) / 2; // 右端の座標
+        var y = gc.CanvasHeight - size.y; // 下端の座標
+        return new int2(x, y);
+    }
+}
+
 public sealed class GameClearScene : GcScene
 {
     private GameClearSceneState _state;
+    private readonly ButtonActor _retryButton;
+    private readonly GcActor[] _actors;
 
-    private ButtonActor _retryButton;
-    private TimerActor _timerActor;
+    public GameClearScene()
+    {
+        _retryButton = new ButtonActor(GcImage.Button_retry, GcAnchor.LowerCenter, new float2(0, -32));
+        _retryButton.Priority = 4;
+
+        _actors = new GcActor[]
+        {
+            new BackgroundActor(),
+            new ClearBoyActor(),
+            new PlaneActor(GcImage.Plane_1),
+            new PlaneActor(GcImage.Plane_2),
+            new PlaneActor(GcImage.Plane_3),
+            new PlaneActor(GcImage.Plane_4),
+            new PlaneActor(GcImage.Plane_5),
+            new PlaneActor(GcImage.Plane_6),
+            new PlaneActor(GcImage.Plane_7),
+            new PlaneActor(GcImage.Plane_8),
+            _retryButton
+        };
+    }
 
     public override void EnterScene(object state)
     {
-        _state = (GameClearSceneState) state;
+        _state = (GameClearSceneState)state;
 
         // クリア音再生
         gc.PlaySE(GcSound.Se_clear);
 
-        // リトライボタンの追加
-        _retryButton = new ButtonActor(GcImage.Button_retry, GcAnchor.LowerCenter, new float2(0, -32));
-        gc.AddActor(_retryButton);
-
         // タイマーの追加
-        // TODO 座標計算ちょっと汚いのとTimerActor内の実装と重複してて気持ち悪い
-        var k = (_state.ClearTime == 1) ? 1 : ((int) Mathf.Log10(_state.ClearTime) + 2); // 秒を含む桁数
-        var size = gc.GetImageSize(GcImage.Number_0);
-        var x = gc.CanvasWidth / 2 + size.x * (k - 1) / 2; // 右端の座標
-        var y = gc.CanvasHeight - size.y; // 下端の座標
-        _timerActor = new TimerActor(_state.ClearTime, new int2(x, y));
-        gc.AddActor(_timerActor);
+        gc.AddActor(new ClearTimeActor(_state.ClearTime));
 
-        // 飛行機の追加
-        gc.AddActor(new PlaneActor(GcImage.Plane_1));
-        gc.AddActor(new PlaneActor(GcImage.Plane_2));
-        gc.AddActor(new PlaneActor(GcImage.Plane_3));
-        gc.AddActor(new PlaneActor(GcImage.Plane_4));
-        gc.AddActor(new PlaneActor(GcImage.Plane_5));
-        gc.AddActor(new PlaneActor(GcImage.Plane_6));
-        gc.AddActor(new PlaneActor(GcImage.Plane_7));
-        gc.AddActor(new PlaneActor(GcImage.Plane_8));
+        // その他のアクターの追加
+        foreach (var actor in _actors)
+        {
+            gc.AddActor(actor);
+        }
     }
 
     public override void UpdateScene()
@@ -112,16 +173,6 @@ public sealed class GameClearScene : GcScene
     {
         // 画面消去
         gc.ClearScreen();
-
-        // 背景
-        gc.DrawImageWithAnchor(GcImage.Clear_sky, GcAnchor.MiddleCenter);
-        // ロゴ
-        gc.DrawImageWithAnchor(GcImage.Logo_clear, GcAnchor.UpperCenter, new float2(0, 32));
-        // キャラ Actor化してもいいかも
-        var deg = 360 * (gc.TimeSinceStartup % 1);
-        var cy = (int) (32 * gc.Sin(deg));
-        // Debug.Log(gc.Sin(deg));
-        gc.DrawImageWithAnchor(GcImage.Clear_boy, GcAnchor.MiddleCenter, new float2(0, cy));
     }
 
     public override void LeaveScene()

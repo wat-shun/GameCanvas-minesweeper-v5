@@ -1,9 +1,5 @@
-using System;
-using System.Linq;
 using GameCanvas;
 using Unity.Mathematics;
-using UnityEditor.Experimental.GraphView;
-using UnityEngine;
 
 public sealed class BoyActor : GcActor
 {
@@ -50,26 +46,25 @@ public sealed class BoyActor : GcActor
 
 public sealed class BombCountActor : GcActor
 {
-    private readonly int _count;
-    private readonly int2 _padding = new int2(0);
+    private readonly byte[] _numbers;
 
     public BombCountActor(int count)
     {
-        _count = count;
+        _numbers = count.CalcDigits(); ;
     }
 
     public override void Draw()
     {
         // 爆弾の描画
-        gc.DrawImage(GcImage.Bomb, _padding);
+        gc.DrawImage(GcImage.Bomb);
 
         // 数字の描画
-        var countStr = _count.ToString();
-        for (var i = 0; i < countStr.Length; i++)
+        for (var i = 0; i < _numbers.Length; i++)
         {
-            var numStr = countStr[i];
-            var num = int.Parse(numStr.ToString());
-            gc.DrawImage(NumberImage.Image[num], _padding + new int2(NumberImage.Size.x * (i + 1), 0));
+            var idx = _numbers[_numbers.Length - i - 1];
+            var img = NumberImage.Image[idx];
+            var pos = new float2(NumberImage.Size.x * (i + 1), 0);
+            gc.DrawImage(img, pos);
         }
     }
 }
@@ -77,9 +72,9 @@ public sealed class BombCountActor : GcActor
 public sealed class GamePlayScene : GcScene
 {
     // ゲーム設定
-    private float _startTime;
     private static readonly int2 BoardSize = new int2(10, 8);
     private const int BombCount = 15; // 爆弾の数
+    private float _startTime;
     private MinesweeperBoard _minesweeperBoard;
 
     // 描画設定
@@ -88,7 +83,7 @@ public sealed class GamePlayScene : GcScene
     private TimerActor _timerActor;
 
     // 入力関係
-    private ButtonActor[,] _cellButton;
+    private ButtonActor[][] _cellArray;
     private bool _isProcessedPointerEvent = false;
 
     public override void EnterScene(object state)
@@ -110,54 +105,64 @@ public sealed class GamePlayScene : GcScene
         gc.AddActor(new BombCountActor(BombCount));
 
         // ゲームの状態の初期化
-        _minesweeperBoard = new MinesweeperBoard(BoardSize, BombCount);
+        _minesweeperBoard = new MinesweeperBoard(gc, BoardSize, BombCount);
 
         // セルボタンの初期化
-        _cellButton = new ButtonActor[BoardSize.x, BoardSize.y];
-        for (var i = 1; i < BoardSize.x + 1; i++)
+        _cellArray = new ButtonActor[BoardSize.x][];
+        for (var x = 0; x < BoardSize.x; x++)
         {
-            for (var j = 1; j < BoardSize.y + 1; j++)
-            {
-                var x = i - 1;
-                var y = j - 1;
-                var pos = _boardPadding + new float2(_cellImageSize.x * i, _cellImageSize.y * j);
-                var button = new ButtonActor(GcImage.Cell_dummy, GcAnchor.UpperLeft, pos);
+            _cellArray[x] = new ButtonActor[BoardSize.y];
 
-                _cellButton[x, y] = button;
-                gc.AddActor(button);
+            for (var y = 0; y < BoardSize.y; y++)
+            {
+                var pos = _boardPadding + _cellImageSize + new float2(_cellImageSize.x * x, _cellImageSize.y * y);
+                var cell = new ButtonActor(GcImage.Cell_dummy, GcAnchor.UpperLeft, pos);
+
+                _cellArray[x][y] = cell;
+                gc.AddActor(cell);
             }
         }
     }
 
     public override void UpdateScene()
     {
-        _timerActor.Second = (int) (gc.TimeSinceStartup - _startTime);
+        _timerActor.Second = (int)(gc.TimeSinceStartup - _startTime);
 
-        for (var x = 0; x < BoardSize.x; x++)
+        // 以降は、リリースされた瞬間だけ処理する
+        if (gc.IsTouched())
         {
-            for (var y = 0; y < BoardSize.y; y++)
+            // 既に処理済みであればスキップする
+            if (_isProcessedPointerEvent)
             {
-                gc.TryGetPointerEvent(0, out var e);
-
-                // ホールド処理とタッチ処理が2回処理されるのを防ぐため、PointerEventを見て離上されたかをチェックする
-                // TODO ボタン処理の中に移動した方が良いのでは
-                if (e.Frame == 0 && e.Phase == GcPointerEventPhase.Begin) // イベントがない時の既定値
+                if (gc.IsTouchEnded())
                 {
                     _isProcessedPointerEvent = false;
                 }
-                else if (!_isProcessedPointerEvent && !_minesweeperBoard.IsOpened(x, y))
-                {
-                    if (_cellButton[x, y].IsHolding(0.5f)) // 旗の設置処理
-                    {
-                        _isProcessedPointerEvent = true;
+                return;
+            }
 
+            for (var x = 0; x < BoardSize.x; x++)
+            {
+                for (var y = 0; y < BoardSize.y; y++)
+                {
+                    // 既に開いているマスは処理しない
+                    if (_minesweeperBoard.IsOpened(x, y)) continue;
+
+                    // 旗の設置処理
+                    if (_cellArray[x][y].IsHolding())
+                    {
                         gc.PlaySE(GcSound.Se_flagged);
                         _minesweeperBoard.TurnFlag(x, y);
-                    }
-                    else if (!_minesweeperBoard.IsFlag(x, y) && _cellButton[x, y].IsReleased()) // セルの開封処理
-                    {
-                        _isProcessedPointerEvent = true;
 
+                        // 設置と開封で多重に処理するのを防ぐため
+                        // 次のタッチ終了イベントまで処理をスキップする
+                        _isProcessedPointerEvent = true;
+                        return;
+                    }
+
+                    // セルの開封処理
+                    if (!_minesweeperBoard.IsFlag(x, y) && _cellArray[x][y].IsTapped())
+                    {
                         gc.PlaySE(GcSound.Se_open);
                         _minesweeperBoard.Open(x, y);
 
@@ -170,6 +175,7 @@ public sealed class GamePlayScene : GcScene
                         {
                             gc.ChangeScene<GameClearScene>(new GameClearSceneState(_timerActor.Second));
                         }
+                        return;
                     }
                 }
             }
@@ -197,13 +203,11 @@ public sealed class GamePlayScene : GcScene
 
         // ボードに合わせて描画する
         // 基本的に隠れるけどデバッグモードとかで見れるような感じにしたいので全部書いておく
-        for (var i = 1; i < BoardSize.x + 1; i++)
+        for (var x = 0; x < BoardSize.x; x++)
         {
-            for (var j = 1; j < BoardSize.y + 1; j++)
+            for (var y = 0; y < BoardSize.y; y++)
             {
-                var x = i - 1;
-                var y = j - 1;
-                var pos = _boardPadding + new float2(_cellImageSize.x * i, _cellImageSize.y * j);
+                var pos = _boardPadding + _cellImageSize + new float2(_cellImageSize.x * x, _cellImageSize.y * y);
 
                 // 爆弾か数字
                 if (_minesweeperBoard.IsBomb(x, y))

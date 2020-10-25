@@ -3,7 +3,12 @@ using Unity.Mathematics;
 
 public sealed class GameOverScene : GcScene
 {
-    private ButtonActor _retryButton;
+    private readonly ButtonActor _retryButton;
+
+    public GameOverScene()
+    {
+        _retryButton = new ButtonActor(GcImage.Button_retry, GcAnchor.LowerCenter, new float2(0, -32));
+    }
 
     public override void EnterScene(object state)
     {
@@ -14,14 +19,13 @@ public sealed class GameOverScene : GcScene
         gc.PlaySound(GcSound.Se_gameover);
 
         // ボタンの追加
-        _retryButton = new ButtonActor(GcImage.Button_retry, GcAnchor.LowerCenter, new float2(0, -32));
         AddActor(_retryButton);
     }
 
     public override void UpdateScene()
     {
         // リトライボタンが離上されたらゲームシーンに飛ばす
-        if (gc.IsTouchEnded(out GcPointerEvent touchEvent) && gc.HitTest(_retryButton.AABB, touchEvent.Point))
+        if (_retryButton.IsReleased())
         {
             gc.ChangeScene<GamePlayScene>();
         }

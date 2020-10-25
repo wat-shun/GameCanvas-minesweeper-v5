@@ -7,52 +7,50 @@ using UnityEngine;
 /// </summary>
 public sealed class ButtonActor : GcActor
 {
+    private const float HoldThreshold = 0.5f; // ホールド判定閾値
+
     private readonly GcImage _image;
     private readonly GcAnchor _anchor;
-    private readonly float2 _padding;
+    private readonly float2 _offset;
+    private readonly GcAABB _AABB;
 
-    public GcAABB AABB { get; } // TODO 当たり判定は外部で使いたい時もあるので露出させてるけどやめたほうがいい気もする
-
-    public ButtonActor(in GcImage image, in GcAnchor anchor = GcAnchor.UpperLeft, in float2 padding = new float2())
+    public ButtonActor(in GcImage image, in GcAnchor anchor = GcAnchor.UpperLeft, in float2 offset = default)
     {
         _image = image;
         _anchor = anchor;
-        _padding = padding;
+        _offset = offset;
 
-        var leftUpperPosition = gc.CalcImageUpperLeftPosition(_image, _anchor, _padding);
+        var leftUpperPosition = gc.CalcImageUpperLeftPosition(_image, _anchor, _offset);
         var imageSize = gc.GetImageSize(_image);
 
-        AABB = new GcAABB(
-            new Rect(
-                leftUpperPosition.x,
-                leftUpperPosition.y,
-                imageSize.x,
-                imageSize.y
-            )
-        );
+        _AABB = GcAABB.XYWH(leftUpperPosition, imageSize);
     }
 
     /// <summary>
-    /// このボタンが指定秒数ホールドされているか
+    /// このボタンの上で、指定秒数ホールドされて続けているかどうか
     /// </summary>
-    /// <returns></returns>
-    public bool IsHolding(in float threshold)
+    public bool IsHolding()
     {
-        gc.TryGetPointerEvent(0, out var touchEvent);
-        return touchEvent.Phase == GcPointerEventPhase.Hold
-               && gc.HitTest(AABB, touchEvent.Point)
-               && gc.GetPointerDuration(0) >= threshold;
+        return gc.IsTouched(out GcPointerTrace t)
+            && t.Duration >= HoldThreshold
+            && gc.HitTest(_AABB, t.Begin.Point)
+            && gc.HitTest(_AABB, t.Current.Point);
+    }
+
+    /// <summary>
+    /// タップ判定
+    /// </summary>
+    public bool IsTapped()
+    {
+        return gc.IsTapped(_AABB, out _);
     }
 
     /// <summary>
     /// このボタンがリリースされたか
     /// </summary>
-    /// <returns></returns>
     public bool IsReleased()
     {
-        gc.TryGetPointerEvent(0, out var touchEvent);
-        return touchEvent.Phase == GcPointerEventPhase.End
-               && gc.HitTest(AABB, touchEvent.Point);
+        return gc.IsTouchEnded(_AABB, out _);
     }
 
     public override void Update()
@@ -61,7 +59,19 @@ public sealed class ButtonActor : GcActor
 
     public override void Draw()
     {
-        // gc.DrawRect(AABB.Center - AABB.HalfSize, AABB.HalfSize * 2); // デバッグ用の当たり判定描画
-        gc.DrawImageWithAnchor(_image, _anchor, _padding);
+        gc.DrawImageWithAnchor(_image, _anchor, _offset);
+
+        // デバッグ用の当たり判定描画
+        //if (gc.IsTouched(_AABB, out float2 pos))
+        //{
+        //    using (gc.StyleScope)
+        //    {
+        //        gc.SetColor(255, 0, 0, 64);
+        //        gc.FillRect(_AABB);
+
+        //        gc.SetColor(32, 0, 0);
+        //        gc.FillCircle(pos, 4);
+        //    }
+        //}
     }
 }

@@ -1,4 +1,4 @@
-using System;
+using System.ComponentModel;
 using GameCanvas;
 using Unity.Mathematics;
 
@@ -8,26 +8,7 @@ using Unity.Mathematics;
 public static class GcProxyExtensions
 {
     /// <summary>
-    /// 矩形アンカーを既定値に戻します
-    /// </summary>
-    /// <param name="gc"></param>
-    public static void ResetRectAnchor(this GcProxy gc)
-    {
-        gc.SetRectAnchor(GcAnchor.UpperLeft);
-    }
-
-    /// <summary>
-    /// 文字列アンカーを既定値に戻します。
-    /// </summary>
-    /// <param name="gc"></param>
-    public static void ResetStringAnchor(this GcProxy gc)
-    {
-        gc.SetStringAnchor(GcAnchor.UpperLeft);
-    }
-
-
-    /// <summary>
-    /// Game.DrawImageByAnchorを使うときの描画する画像の左上の座標を計算します。
+    /// <see cref="DrawImageWithAnchor"/>を使うときの描画する画像の左上の座標を計算します。
     /// </summary>
     /// <param name="gc"></param>
     /// <param name="image">GcImage</param>
@@ -35,7 +16,7 @@ public static class GcProxyExtensions
     /// <param name="padding">指定したアンカーから右下方向にどれだけずらすか</param>
     /// <returns>左上座標</returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public static float2 CalcImageUpperLeftPosition(this GcProxy gc,
+    public static float2 CalcImageUpperLeftPosition(this IGameCanvas gc,
         in GcImage image, in GcAnchor anchor, in float2 padding)
     {
         var pos = padding;
@@ -61,7 +42,7 @@ public static class GcProxyExtensions
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new InvalidEnumArgumentException(nameof(anchor), (int)anchor, typeof(GcAnchor));
         }
 
         // y座標
@@ -85,60 +66,68 @@ public static class GcProxyExtensions
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new InvalidEnumArgumentException(nameof(anchor), (int)anchor, typeof(GcAnchor));
         }
 
         return pos;
     }
 
     /// <summary>
-    /// GcAnchorを流用して、キャンバス内のアンカーに相当する場所に、アンカーが指定された画像を描画します。
+    /// <see cref="GcAnchor"/>を流用して、キャンバス内のアンカーに相当する場所に、アンカーが指定された画像を描画します。
     /// </summary>
     /// <param name="gc"></param>
     /// <param name="image">GcImage</param>
     /// <param name="anchor">GcAnchor</param>
-    /// <param name="padding">指定したアンカーから右下方向にどれだけずらすか</param>
-    public static void DrawImageWithAnchor(this GcProxy gc,
-        in GcImage image, in GcAnchor anchor = GcAnchor.UpperLeft, in float2 padding = new float2())
+    /// <param name="offset">指定したアンカーから右下方向にどれだけずらすか</param>
+    public static void DrawImageWithAnchor(this IGameCanvas gc,
+        in GcImage image, GcAnchor anchor = GcAnchor.UpperLeft, float2 offset = default)
     {
         // 基本になる位置を計算
-        // todo 変数名がmarginだと間違ってる気もする
-        float2 margin;
         switch (anchor)
         {
             case GcAnchor.UpperLeft:
-                margin = new float2(0, 0);
                 break;
+
             case GcAnchor.UpperCenter:
-                margin = new float2(gc.CanvasCenter.x, 0);
+                offset += new float2(gc.CanvasCenter.x, 0);
                 break;
+
             case GcAnchor.UpperRight:
-                margin = new float2(gc.CanvasWidth, 0);
+                offset += new float2(gc.CanvasWidth, 0);
                 break;
+
             case GcAnchor.MiddleLeft:
-                margin = new float2(0, gc.CanvasCenter.y);
+                offset += new float2(0, gc.CanvasCenter.y);
                 break;
+
             case GcAnchor.MiddleCenter:
-                margin = gc.CanvasCenter;
+                offset += gc.CanvasCenter;
                 break;
+
             case GcAnchor.MiddleRight:
-                margin = new float2(gc.CanvasWidth, gc.CanvasCenter.y);
+                offset += new float2(gc.CanvasWidth, gc.CanvasCenter.y);
                 break;
+
             case GcAnchor.LowerLeft:
-                margin = new float2(0, gc.CanvasHeight);
+                offset += new float2(0, gc.CanvasHeight);
                 break;
+
             case GcAnchor.LowerCenter:
-                margin = new float2(gc.CanvasCenter.x, gc.CanvasHeight);
+                offset += new float2(gc.CanvasCenter.x, gc.CanvasHeight);
                 break;
+
             case GcAnchor.LowerRight:
-                margin = new float2(gc.CanvasWidth, gc.CanvasHeight);
+                offset += new float2(gc.CanvasWidth, gc.CanvasHeight);
                 break;
+
             default:
-                throw new ArgumentOutOfRangeException(nameof(anchor), anchor, null);
+                throw new InvalidEnumArgumentException(nameof(anchor), (int)anchor, typeof(GcAnchor));
         }
 
-        gc.SetRectAnchor(anchor);
-        gc.DrawImage(image, padding + margin);
-        gc.ResetRectAnchor();
+        using (gc.StyleScope)
+        {
+            gc.SetRectAnchor(anchor);
+            gc.DrawImage(image, offset);
+        }
     }
 }

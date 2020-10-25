@@ -1,8 +1,10 @@
-using UnityEngine;
+using GameCanvas;
 using Unity.Mathematics;
+using UnityEngine;
 
 public class MinesweeperBoard
 {
+    private readonly IGameCanvas _gc;
     private readonly int2 _boardSize; // 盤面の大きさ
     private readonly int _bombCount; // 爆弾の数
 
@@ -13,13 +15,12 @@ public class MinesweeperBoard
     private readonly int[,] _cntAroundBomb; // 周囲の爆弾の数
     private int _cntClosedCell; // 閉じてるセルの数
 
-    private readonly int[] _dx = {1, 1, 0, -1, -1, -1, 0, 1};
-    private readonly int[] _dy = {0, 1, 1, 1, 0, -1, -1, -1};
+    private readonly int[] _dx = { 1, 1, 0, -1, -1, -1, 0, 1 };
+    private readonly int[] _dy = { 0, 1, 1, 1, 0, -1, -1, -1 };
 
-    private readonly System.Random _r = new System.Random();
-
-    public MinesweeperBoard(int2 size, int bombCnt)
+    public MinesweeperBoard(IGameCanvas gc, int2 size, int bombCnt)
     {
+        _gc = gc;
         _boardSize = size;
         _bombCount = bombCnt;
 
@@ -97,8 +98,8 @@ public class MinesweeperBoard
         var k = _bombCount;
         while (k > 0)
         {
-            var px = _r.Next(0, _boardSize.x - 1);
-            var py = _r.Next(0, _boardSize.y - 1);
+            var px = _gc.Random(0, _boardSize.x - 1);
+            var py = _gc.Random(0, _boardSize.y - 1);
 
             // 開けるセルとすでにあるセルには置かない
             if ((px == x && py == y) || IsBomb(px, py)) continue;

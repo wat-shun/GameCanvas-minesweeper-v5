@@ -7,7 +7,7 @@ using UnityEngine.Assertions;
 /// 秒のみの時計を描画をするアクターです。
 /// 左に伸びる形で描画するため、右上の座標を指定します。
 /// </summary>
-public sealed class TimerActor : GcActor
+public class TimerActor : GcActor
 {
     public int Second { get; set; } // 秒は外部から更新したいときもあるので公開する
     private readonly int2 _rightUpperPos;
@@ -23,7 +23,7 @@ public sealed class TimerActor : GcActor
         Assert.IsTrue(Second >= 0); // 負の秒数には対応しない
 
         // 桁数を計算する
-        var k = (Second == 0) ? 1 : ((int) Mathf.Log10(Second) + 1);
+        var k = (Second == 0) ? 1 : ((int)Mathf.Log10(Second) + 1);
 
         // 「秒」の描画
         gc.DrawImage(
