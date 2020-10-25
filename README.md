@@ -6,6 +6,6 @@ SFCで開講された2016年度秋学期スマートデバイスプログラミ�
 
 ## プレイ画面
 
-![title](https://gyazo.com/9e0823d86e75df1fc2cb71a2a728ccc1)
+![title](https://user-images.githubusercontent.com/6896982/97120667-0dbf4100-175c-11eb-85e5-e2659f01ed84.png)
 
-![gameplay](https://gyazo.com/7dceaaf0f119ce5bfc4178fd774cca63)
+![gameplay](https://user-images.githubusercontent.com/6896982/97120668-11eb5e80-175c-11eb-99f4-d3e400975a9e.png)
