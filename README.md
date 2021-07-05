@@ -4,6 +4,9 @@ SFCで開講された2016年度秋学期スマートデバイスプログラミ�
 
 授業の参考資料として公開しています。
 
+## アセットについて
+[いらすとや](https://www.irasutoya.com/)様の画像を使用しております。
+
 ## プレイ画面
 
 ![title](https://user-images.githubusercontent.com/6896982/97120667-0dbf4100-175c-11eb-85e5-e2659f01ed84.png)
